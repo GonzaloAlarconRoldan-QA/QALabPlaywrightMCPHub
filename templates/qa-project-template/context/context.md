@@ -17,6 +17,10 @@
 * Username:
 * PIN / Password:
 
+## Login workflow
+* Select the Quality Assurance user (button)
+* Enter the PIN clicking the numbers on screen
+
 ---
 
 ## Main Business Workflows

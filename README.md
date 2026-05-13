@@ -57,3 +57,12 @@ To enable MCP (Model Context Protocol) support for Playwright automation:
 ## Notes
 
 This repository serves as an overview and starting point for multi-application MCP testing. Each application is isolated in its own workspace to reduce chat context overlap and improve test reliability.
+
+## How to run tests in chat
+```bash
+Use the workflow defined in:
+
+prompts/navigation-validation.md
+
+Focus on validating that "The Farm" is no longer visible in the navigation system.
+```
