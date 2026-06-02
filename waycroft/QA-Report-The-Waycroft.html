@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Report — The Waycroft</title>
+  <style>
+    :root {
+      --navy: #0d2048;
+      --navy-light: #1a3060;
+      --gold: #c9a84c;
+      --gold-light: #e2c47a;
+      --white: #ffffff;
+      --off-white: #f7f5f0;
+      --light-gray: #e8e4dc;
+      --red: #c0392b;
+      --red-light: #fdf0ee;
+      --orange: #d35400;
+      --orange-light: #fef3ec;
+      --yellow: #b7950b;
+      --yellow-light: #fefaed;
+      --blue: #1a6496;
+      --blue-light: #eaf4fb;
+      --green: #1a7a4a;
+      --green-light: #eafaf1;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--off-white);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    .report-header {
+      background: var(--navy);
+      color: var(--white);
+      padding: 48px 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .report-header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 50%;
+    }
+    .report-header::after {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 180px; height: 180px;
+      border: 1px solid rgba(201,168,76,0.15);
+      border-radius: 50%;
+    }
+    .header-badge {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 2px;
+      margin-bottom: 16px;
+    }
+    .report-header h1 {
+      font-size: 36px;
+      font-weight: 300;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .report-header h1 span { color: var(--gold); font-weight: 600; }
+    .report-header p { color: rgba(255,255,255,0.65); font-size: 14px; margin-bottom: 32px; }
+    .header-meta {
+      display: flex; gap: 40px; flex-wrap: wrap;
+    }
+    .header-meta-item label {
+      display: block; font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gold); margin-bottom: 3px;
+    }
+    .header-meta-item span { font-size: 14px; color: rgba(255,255,255,0.9); }
+
+    /* ── SCORE BANNER ── */
+    .score-banner {
+      background: var(--navy-light);
+      padding: 24px 60px;
+      display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+    }
+    .score-main {
+      display: flex; align-items: baseline; gap: 8px;
+    }
+    .score-number {
+      font-size: 52px; font-weight: 700; color: var(--gold);
+      line-height: 1;
+    }
+    .score-denom { font-size: 20px; color: rgba(255,255,255,0.4); }
+    .score-label { font-size: 13px; color: rgba(255,255,255,0.6); letter-spacing: 1px; text-transform: uppercase; }
+    .score-verdict {
+      background: rgba(192,57,43,0.25);
+      border: 1px solid rgba(192,57,43,0.5);
+      color: #f1948a;
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; padding: 6px 14px; border-radius: 3px;
+    }
+    .score-dims {
+      display: flex; gap: 20px; flex-wrap: wrap; margin-left: auto;
+    }
+    .score-dim {
+      text-align: center;
+    }
+    .score-dim .dim-val {
+      font-size: 22px; font-weight: 700; color: var(--white);
+    }
+    .score-dim .dim-label {
+      font-size: 10px; color: rgba(255,255,255,0.45);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; min-height: calc(100vh - 200px); }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px; min-width: 260px;
+      background: var(--navy);
+      padding: 32px 0;
+      position: sticky; top: 0;
+      height: 100vh; overflow-y: auto;
+    }
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-section-title {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); padding: 8px 24px 4px;
+    }
+    .sidebar a {
+      display: block; padding: 8px 24px;
+      font-size: 13px; color: rgba(255,255,255,0.6);
+      text-decoration: none; transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar a:hover {
+      color: var(--gold); background: rgba(255,255,255,0.04);
+      border-left-color: var(--gold);
+    }
+    .sidebar .sidebar-count {
+      float: right; font-size: 11px;
+      background: rgba(255,255,255,0.1);
+      padding: 1px 7px; border-radius: 10px;
+    }
+    .sidebar .critical-badge { background: rgba(192,57,43,0.35); color: #f1948a; }
+    .sidebar .high-badge { background: rgba(211,84,0,0.35); color: #f0a784; }
+    .sidebar .medium-badge { background: rgba(183,149,11,0.35); color: #f5d76e; }
+    .sidebar .low-badge { background: rgba(26,100,150,0.35); color: #85c1e9; }
+
+    /* ── MAIN ── */
+    .main { flex: 1; padding: 40px 60px; max-width: 1100px; }
+
+    /* ── SECTION ── */
+    .section { margin-bottom: 56px; }
+    .section-title {
+      font-size: 22px; font-weight: 600; color: var(--navy);
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 10px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title .icon { color: var(--gold); font-size: 20px; }
+
+    /* ── SUMMARY CARDS ── */
+    .summary-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px; margin-bottom: 32px;
+    }
+    .summary-card {
+      background: var(--white); border-radius: 8px; padding: 20px;
+      border: 1px solid var(--light-gray); text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .summary-card .card-num {
+      font-size: 36px; font-weight: 700; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .summary-card .card-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .card-critical .card-num { color: var(--red); }
+    .card-high .card-num { color: var(--orange); }
+    .card-medium .card-num { color: var(--yellow); }
+    .card-low .card-num { color: var(--blue); }
+    .card-total .card-num { color: var(--navy); }
+    .card-errors .card-num { color: var(--red); }
+
+    /* ── FINDINGS ── */
+    .finding {
+      background: var(--white); border-radius: 8px;
+      border: 1px solid var(--light-gray); margin-bottom: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      overflow: hidden;
+    }
+    .finding-header {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 18px 20px; cursor: pointer;
+    }
+    .finding-badge {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
+      white-space: nowrap; margin-top: 2px;
+    }
+    .badge-critical { background: var(--red-light); color: var(--red); border: 1px solid rgba(192,57,43,0.2); }
+    .badge-high { background: var(--orange-light); color: var(--orange); border: 1px solid rgba(211,84,0,0.2); }
+    .badge-medium { background: var(--yellow-light); color: var(--yellow); border: 1px solid rgba(183,149,11,0.2); }
+    .badge-low { background: var(--blue-light); color: var(--blue); border: 1px solid rgba(26,100,150,0.2); }
+    .badge-pass { background: var(--green-light); color: var(--green); border: 1px solid rgba(26,122,74,0.2); }
+    .finding-id {
+      font-size: 11px; font-weight: 700; color: var(--muted);
+      white-space: nowrap; margin-top: 3px; min-width: 44px;
+    }
+    .finding-title {
+      font-size: 15px; font-weight: 600; color: var(--navy); flex: 1;
+    }
+    .finding-body {
+      padding: 0 20px 20px; border-top: 1px solid var(--light-gray);
+    }
+    .finding-meta {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin: 16px 0;
+    }
+    .finding-meta-item label {
+      display: block; font-size: 10px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+    }
+    .finding-meta-item p { font-size: 13px; color: var(--text); }
+    .finding-screenshots {
+      display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;
+    }
+    .finding-screenshots img {
+      width: 280px; height: 158px; object-fit: cover;
+      border-radius: 6px; border: 1px solid var(--light-gray);
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .finding-screenshots img:hover { opacity: 0.85; }
+    .finding-screenshots .img-label {
+      font-size: 11px; color: var(--muted); margin-top: 4px;
+    }
+    .finding-img-wrap { display: flex; flex-direction: column; }
+
+    /* ── STEPS LIST ── */
+    .steps-list {
+      background: var(--off-white); border-radius: 6px;
+      padding: 12px 16px; margin: 12px 0; font-size: 13px;
+    }
+    .steps-list li { padding: 3px 0; list-style: decimal; margin-left: 16px; }
+
+    /* ── DIFF BLOCKS ── */
+    .diff-row { display: flex; gap: 12px; margin: 12px 0; }
+    .diff-block {
+      flex: 1; border-radius: 6px; padding: 12px 14px; font-size: 13px;
+    }
+    .diff-expected { background: var(--green-light); border-left: 3px solid var(--green); }
+    .diff-actual { background: var(--red-light); border-left: 3px solid var(--red); }
+    .diff-block strong {
+      display: block; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 1.5px; margin-bottom: 4px; opacity: 0.6;
+    }
+
+    /* ── TABLES ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; }
+    .data-table th {
+      background: var(--navy); color: var(--white);
+      padding: 10px 14px; text-align: left;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--light-gray); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:nth-child(even) td { background: var(--off-white); }
+    .data-table .pass { color: var(--green); font-weight: 600; }
+    .data-table .fail { color: var(--red); font-weight: 600; }
+    .data-table .warn { color: var(--orange); font-weight: 600; }
+
+    /* ── PERF BARS ── */
+    .perf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .perf-card {
+      background: var(--white); border: 1px solid var(--light-gray);
+      border-radius: 8px; padding: 20px;
+    }
+    .perf-card h4 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .perf-value { font-size: 28px; font-weight: 700; }
+    .perf-value.good { color: var(--green); }
+    .perf-value.warn { color: var(--yellow); }
+    .perf-value.bad { color: var(--red); }
+    .perf-note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .perf-bar-wrap { margin-top: 8px; }
+    .perf-bar-bg { background: var(--light-gray); border-radius: 4px; height: 8px; overflow: hidden; }
+    .perf-bar { height: 8px; border-radius: 4px; }
+    .perf-bar.good { background: var(--green); }
+    .perf-bar.warn { background: var(--yellow); }
+    .perf-bar.bad { background: var(--red); }
+
+    /* ── TEST CASES ── */
+    .tc-grid { display: grid; gap: 12px; }
+    .tc {
+      background: var(--white); border: 1px solid var(--light-gray);
+      border-radius: 8px; padding: 16px 20px;
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 16px; align-items: start;
+    }
+    .tc-num { font-size: 11px; font-weight: 700; color: var(--muted); padding-top: 2px; }
+    .tc-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+    .tc-desc { font-size: 13px; color: var(--muted); }
+    .tc-result {
+      font-size: 11px; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; padding: 3px 10px; border-radius: 3px;
+      white-space: nowrap;
+    }
+    .tc-pass { background: var(--green-light); color: var(--green); }
+    .tc-fail { background: var(--red-light); color: var(--red); }
+    .tc-partial { background: var(--yellow-light); color: var(--yellow); }
+
+    /* ── AREAS EXPLORED ── */
+    .areas-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .area-card {
+      background: var(--white); border: 1px solid var(--light-gray);
+      border-radius: 8px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .area-icon { font-size: 20px; }
+    .area-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .area-status { font-size: 11px; color: var(--muted); }
+
+    /* ── RECOMMENDATIONS ── */
+    .rec-group { margin-bottom: 24px; }
+    .rec-group h4 {
+      font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 12px; padding: 6px 12px;
+      border-radius: 4px;
+    }
+    .rec-immediate h4 { background: var(--red-light); color: var(--red); }
+    .rec-high h4 { background: var(--orange-light); color: var(--orange); }
+    .rec-medium h4 { background: var(--yellow-light); color: var(--yellow); }
+    .rec-low h4 { background: var(--blue-light); color: var(--blue); }
+    .rec-list { list-style: none; }
+    .rec-list li {
+      padding: 8px 12px; font-size: 13px; border-bottom: 1px solid var(--light-gray);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .rec-list li:last-child { border-bottom: none; }
+    .rec-list li::before { content: '→'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
+
+    /* ── GALLERY ── */
+    .gallery-section { margin-bottom: 40px; }
+    .gallery-section h3 { font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 14px; }
+    .gallery-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+    .gallery-item { position: relative; }
+    .gallery-item img {
+      width: 100%; border-radius: 6px; border: 1px solid var(--light-gray);
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .gallery-item img:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+    .gallery-item .gallery-label {
+      font-size: 11px; color: var(--muted); margin-top: 5px; text-align: center;
+    }
+    .gallery-item .gallery-tag {
+      position: absolute; top: 8px; left: 8px;
+      font-size: 10px; font-weight: 700; padding: 2px 8px;
+      border-radius: 3px; letter-spacing: 1px; text-transform: uppercase;
+    }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9); z-index: 1000;
+      justify-content: center; align-items: center; flex-direction: column;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 6px; }
+    .lightbox-close {
+      position: absolute; top: 20px; right: 24px;
+      color: white; font-size: 28px; cursor: pointer; background: none; border: none;
+    }
+    .lightbox-caption { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 12px; }
+
+    /* ── UX FINDINGS ── */
+    .ux-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .ux-card {
+      background: var(--white); border: 1px solid var(--light-gray);
+      border-radius: 8px; padding: 18px;
+    }
+    .ux-card .ux-id { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+    .ux-card .ux-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+    .ux-card .ux-desc { font-size: 13px; color: var(--muted); }
+
+    /* ── FOOTER ── */
+    .report-footer {
+      background: var(--navy); color: rgba(255,255,255,0.4);
+      text-align: center; padding: 24px; font-size: 12px;
+    }
+
+    /* ── UTILITIES ── */
+    .tag {
+      display: inline-block; font-size: 11px; padding: 2px 8px;
+      border-radius: 3px; background: var(--light-gray); color: var(--muted);
+      margin: 2px;
+    }
+    .divider { border: none; border-top: 1px solid var(--light-gray); margin: 32px 0; }
+    code {
+      background: #f0eee8; padding: 1px 6px; border-radius: 3px;
+      font-family: monospace; font-size: 12px;
+    }
+    .callout {
+      background: var(--red-light); border-left: 4px solid var(--red);
+      padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0;
+      font-size: 13px; color: var(--red);
+    }
+    .callout.warn { background: var(--yellow-light); border-left-color: var(--yellow); color: #7d6608; }
+    .callout.info { background: var(--blue-light); border-left-color: var(--blue); color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="report-header">
+  <div class="header-badge">QA Exploratory Testing Report</div>
+  <h1>The Waycroft <span>Portal</span></h1>
+  <p>https://the-waycroft.vysta.io — Leasing Agent Sales Center</p>
+  <div class="header-meta">
+    <div class="header-meta-item"><label>Date</label><span>June 2, 2026</span></div>
+    <div class="header-meta-item"><label>Tester</label><span>QA Agent (Claude)</span></div>
+    <div class="header-meta-item"><label>Duration</label><span>~90 minutes</span></div>
+    <div class="header-meta-item"><label>Methodology</label><span>Exploratory — Playwright MCP</span></div>
+    <div class="header-meta-item"><label>Viewport</label><span>Default browser (1456×816)</span></div>
+    <div class="header-meta-item"><label>Screenshots</label><span>57 captured</span></div>
+  </div>
+</div>
+
+<!-- SCORE BANNER -->
+<div class="score-banner">
+  <div>
+    <div class="score-label" style="color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Overall Quality Score</div>
+    <div class="score-main">
+      <div class="score-number">4.5</div>
+      <div class="score-denom">/ 10</div>
+    </div>
+  </div>
+  <div class="score-verdict">❌ Not Ready for Production</div>
+  <div class="score-dims">
+    <div class="score-dim"><div class="dim-val">6/10</div><div class="dim-label">Functionality</div></div>
+    <div class="score-dim"><div class="dim-val">2/10</div><div class="dim-label">Content</div></div>
+    <div class="score-dim"><div class="dim-val">4/10</div><div class="dim-label">Data Quality</div></div>
+    <div class="score-dim"><div class="dim-val">5/10</div><div class="dim-label">UI Consistency</div></div>
+    <div class="score-dim"><div class="dim-val">5/10</div><div class="dim-label">Error Handling</div></div>
+    <div class="score-dim"><div class="dim-val">7/10</div><div class="dim-label">Performance</div></div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Report</div>
+      <a href="#summary">Executive Summary</a>
+      <a href="#overview">App Overview</a>
+      <a href="#areas">Areas Explored</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Issues</div>
+      <a href="#critical">Critical <span class="sidebar-count critical-badge">5</span></a>
+      <a href="#high">High <span class="sidebar-count high-badge">6</span></a>
+      <a href="#medium">Medium <span class="sidebar-count medium-badge">7</span></a>
+      <a href="#low">Low <span class="sidebar-count low-badge">7</span></a>
+      <a href="#ux">UI / UX Findings <span class="sidebar-count">6</span></a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Testing</div>
+      <a href="#testcases">Test Cases</a>
+      <a href="#performance">Performance</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Analysis</div>
+      <a href="#risks">Risks & Impact</a>
+      <a href="#recommendations">Recommendations</a>
+      <a href="#screenshots">All Screenshots</a>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- SUMMARY CARDS -->
+    <div class="summary-grid" style="margin-bottom:40px;margin-top:8px;">
+      <div class="summary-card card-total"><div class="card-num">25</div><div class="card-label">Total Issues</div></div>
+      <div class="summary-card card-critical"><div class="card-num">5</div><div class="card-label">Critical</div></div>
+      <div class="summary-card card-high"><div class="card-num">6</div><div class="card-label">High</div></div>
+      <div class="summary-card card-medium"><div class="card-num">7</div><div class="card-label">Medium</div></div>
+      <div class="summary-card card-low"><div class="card-num">7</div><div class="card-label">Low</div></div>
+      <div class="summary-card card-errors"><div class="card-num">7</div><div class="card-label">JS Errors</div></div>
+    </div>
+
+    <!-- EXECUTIVE SUMMARY -->
+    <div class="section" id="summary">
+      <div class="section-title"><span class="icon">📋</span> Executive Summary</div>
+      <p style="margin-bottom:14px;font-size:15px;">The Waycroft is a leasing-agent sales center portal built on the Vysta platform. Agents use it to manage prospects, conduct property tours, and send unit information to interested tenants.</p>
+      <p style="margin-bottom:14px;font-size:15px;">Core functionality — agent authentication, guest/client management, tour tracking, unit availability, and neighborhood mapping — is largely operational. However, the application has <strong>critical content gaps</strong> (Lorem Ipsum text, placeholder gallery images, file metadata watermarks on photos), <strong>significant data quality issues</strong> ($0 unit pricing, missing dimension data), and <strong>7 JavaScript console errors</strong>.</p>
+      <div class="callout">⚠️ The application should NOT be used in live leasing presentations until the 5 critical issues are resolved. Placeholder content, broken gallery images, and watermarked kitchen photos are visible to prospective tenants.</div>
+    </div>
+
+    <!-- APP OVERVIEW -->
+    <div class="section" id="overview">
+      <div class="section-title"><span class="icon">🏢</span> Application Overview</div>
+      <table class="data-table">
+        <tr><th>Attribute</th><th>Details</th></tr>
+        <tr><td><strong>Application Type</strong></td><td>Leasing agent CRM + presentation portal (SPA, hash routing)</td></tr>
+        <tr><td><strong>Property</strong></td><td>The Waycroft — Apartments at Wilson &amp; Glebe, Ballston, Arlington VA</td></tr>
+        <tr><td><strong>Primary Users</strong></td><td>Sales/leasing agents conducting in-person prospect tours</td></tr>
+        <tr><td><strong>Authentication</strong></td><td>Agent selection + 4-digit PIN pad</td></tr>
+        <tr><td><strong>Core Workflow</strong></td><td>Login → Select/Create Guest → Start Tour → Navigate sections → End Tour → Send email</td></tr>
+        <tr><td><strong>Main Sections</strong></td><td>About, Availability (3D/List/Floorplans), Neighborhood Map, Gallery, Amenities, Finishes</td></tr>
+        <tr><td><strong>CRM Features</strong></td><td>Guest create/edit/delete, unit favorites, share via email, tour time tracking, per-guest analytics</td></tr>
+        <tr><td><strong>Kiosk Features</strong></td><td>External display connect (LOCAL), screensaver mode, settings panel</td></tr>
+      </table>
+    </div>
+
+    <!-- AREAS EXPLORED -->
+    <div class="section" id="areas">
+      <div class="section-title"><span class="icon">🗺️</span> Areas Explored</div>
+      <div class="areas-grid">
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Landing Page & Login</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Agent PIN Authentication</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Home Dashboard (6 tiles)</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">About Page</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Availability — 3D Explore</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Availability — Unit List</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Availability — Floorplans</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Neighborhood Map &amp; POIs</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Gallery (All/Residences/Amenities)</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Amenities Section</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Finishes — Kitchens &amp; Bathrooms</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">All Clients / Guest List</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Guest Profile &amp; Analytics</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Create / Edit Guest Forms</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Start Tour / End Tour Flow</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Share Unit Email</div><div class="area-status">Fully explored</div></div></div>
+        <div class="area-card"><div class="area-icon">✅</div><div><div class="area-name">Settings &amp; Connect Panels</div><div class="area-status">Fully explored</div></div></div>
+      </div>
+    </div>
+
+    <!-- ──────────── CRITICAL ──────────── -->
+    <div class="section" id="critical">
+      <div class="section-title"><span class="icon">🔴</span> Critical Issues</div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-01</div>
+          <div class="finding-badge badge-critical">Critical</div>
+          <div class="finding-title">About page contains Lorem Ipsum placeholder text</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Real property description and marketing copy about The Waycroft community</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>"LOREM IPSUM DOLOR" section label with full Lorem Ipsum paragraph body — no real content</div>
+          </div>
+          <ol class="steps-list"><li>Navigate to Home</li><li>Click the "About" tile</li></ol>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap">
+              <img src="26-about-page.png" alt="About page with Lorem Ipsum" onclick="openLightbox(this)" />
+              <div class="img-label">26-about-page.png — Lorem Ipsum visible</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-02</div>
+          <div class="finding-badge badge-critical">Critical</div>
+          <div class="finding-title">Gallery shows only placeholder images across all tabs</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Real property photography for residences and amenities</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>All 3 tabs (ALL, RESIDENCES, AMENITIES) show grey placeholder images labeled "PLACEHOLDER"</div>
+          </div>
+          <ol class="steps-list"><li>Navigate to Gallery</li><li>Click ALL tab — placeholder</li><li>Click RESIDENCES — 1 placeholder</li><li>Click AMENITIES — 1 placeholder</li></ol>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="38-gallery-page.png" alt="Gallery placeholders" onclick="openLightbox(this)" /><div class="img-label">38 — ALL tab</div></div>
+            <div class="finding-img-wrap"><img src="39-gallery-residences.png" alt="Residences tab" onclick="openLightbox(this)" /><div class="img-label">39 — RESIDENCES tab</div></div>
+            <div class="finding-img-wrap"><img src="40-gallery-amenities.png" alt="Amenities tab" onclick="openLightbox(this)" /><div class="img-label">40 — AMENITIES tab</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-03</div>
+          <div class="finding-badge badge-critical">Critical</div>
+          <div class="finding-title">Kitchen finish photos display raw internal file-name watermarks</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Clean, professional kitchen photography</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Vertical rotated watermarks across images: "20191210_121019_02_THE_WAYCROFT_KITCHEN_NEW_AS_BUILT_A_BLAE…"</div>
+          </div>
+          <ol class="steps-list"><li>Navigate to Finishes</li><li>Click "Kitchens"</li></ol>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="45-finishes-kitchens.png" alt="Kitchen watermarks" onclick="openLightbox(this)" /><div class="img-label">45 — Watermarks clearly visible</div></div>
+            <div class="finding-img-wrap"><img src="47-finishes-bathrooms.png" alt="Bathroom watermarks" onclick="openLightbox(this)" /><div class="img-label">47 — Bathrooms: faint watermarks</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-04</div>
+          <div class="finding-badge badge-critical">Critical</div>
+          <div class="finding-title">Units 828 and 328 show $0.00 price in Unit List</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Valid monthly rent prices for all listed units</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Units 828 (2bd/2ba, 1,110 sqft) and 328 (2bd/2ba, 1,110 sqft) both display $0.00</div>
+          </div>
+          <ol class="steps-list"><li>Availability → Unit List</li><li>Set STATUS to ALL</li><li>Observe price column</li></ol>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="29-unit-list-view.png" alt="Zero price units" onclick="openLightbox(this)" /><div class="img-label">29 — $0.00 prices visible</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-05</div>
+          <div class="finding-badge badge-critical">Critical</div>
+          <div class="finding-title">JavaScript console errors accumulate to 7 during session</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Zero console errors throughout the session</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>0 errors at login → 2 errors on Availability load → 3 on Neighborhood → 5 on Amenities → 7 total by session end; 88 warnings accumulated</div>
+          </div>
+          <div class="callout warn">Console errors indicate unhandled promise rejections or missing resources that may silently break data operations, analytics tracking, or tour recording.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────── HIGH ──────────── -->
+    <div class="section" id="high">
+      <div class="section-title"><span class="icon">🟠</span> High Priority Issues</div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-06</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">EXTERIOR square footage shows "0 sqft" for every unit</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Balcony/terrace sqft shown where applicable; "N/A" or hidden if not applicable</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Every single unit in both Unit List and guest profiles shows "0 sqft" for EXTERIOR — column appears to be unmapped or source data missing</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="21-felipe-lee-profile.png" alt="0 sqft exterior" onclick="openLightbox(this)" /><div class="img-label">21 — All exterior values = 0</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-07</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">Units 746 and 363 show 0 bedrooms and 0 interior sq ft</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Studio units correctly labeled (e.g., BEDS = Studio, INT. SIZE = actual sq ft)</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>BEDS = 0 and INT. SIZE = 0 for units 746 (Sold) and 363 (Available) — data entry error or mapping failure</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="30-available-filter.png" alt="0 bed unit 363" onclick="openLightbox(this)" /><div class="img-label">30 — Unit 363: 0 beds, 0 sqft</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-08</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">Analytics Dashboard button is non-functional</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Navigate to a reporting dashboard or open an analytics modal</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Clicking "ANALYTICS DASHBOARD" produces no navigation, no modal, and no visible feedback whatsoever</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="55-analytics-dashboard-page.png" alt="Non-functional analytics dashboard" onclick="openLightbox(this)" /><div class="img-label">55 — Page unchanged after click</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-09</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">Amenities page is a static, non-interactive image</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Interactive amenity map or list with descriptions (pool, gym, rooftop, etc.)</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Single static building exterior render — no clickable zones, no amenity descriptions, no content at all</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="41-amenities-page.png" alt="Static amenities" onclick="openLightbox(this)" /><div class="img-label">41 — Static image only</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-10</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">Guest list "WHEN" date not updated after tour ends</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Felipe Lee's WHEN column updates to 06/02/2026 after today's tour</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Still shows 06/01/2026 in client list; profile detail correctly shows 06/02/2026 — data inconsistency</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="53-end-tour.png" alt="Profile shows new date" onclick="openLightbox(this)" /><div class="img-label">53 — Profile: 06/02/2026</div></div>
+            <div class="finding-img-wrap"><img src="54-analytics-dashboard.png" alt="List shows old date" onclick="openLightbox(this)" /><div class="img-label">54 — List still: 06/01/2026</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-11</div>
+          <div class="finding-badge badge-high">High</div>
+          <div class="finding-title">Access Summary (Total Accesses / Last Access) always shows "–"</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Total portal login count and last access date for each guest</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Both fields show "–" for all guests, including Felipe Lee who has 23 recorded home visits in the Sales Center analytics view</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="24-felipe-analytics.png" alt="Access summary broken" onclick="openLightbox(this)" /><div class="img-label">24 — Access Summary shows –</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────── MEDIUM ──────────── -->
+    <div class="section" id="medium">
+      <div class="section-title"><span class="icon">🟡</span> Medium Priority Issues</div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-12</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">Phone field enforces strict international format with no input masking</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">The phone field requires exactly <code>+1 555-555-1234</code> format. Entering <code>5555551234</code> (common US format) is rejected. No auto-formatting or input mask is provided to guide users.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="10-invalid-format-validation.png" alt="Phone format error" onclick="openLightbox(this)" /><div class="img-label">10 — Format error</div></div>
+            <div class="finding-img-wrap"><img src="11-phone-format-test.png" alt="Phone format test" onclick="openLightbox(this)" /><div class="img-label">11 — 10-digit rejected</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-13</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">Unit VIEW field in Unit Details always blank</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">The "VIEW" label exists on every Unit Details page but the value is always empty — no view direction (e.g., "City View", "Pool View", "Courtyard") is populated for any unit.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="31-unit-detail.png" alt="Blank VIEW field" onclick="openLightbox(this)" /><div class="img-label">31 — VIEW field empty</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-14</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">Banks miscategorized as "Art &amp; Culture" in Neighborhood map</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">PNC Bank, TD Bank, Navy Federal, Bank of America, and Charles Schwab all appear under the "ART &amp; CULTURE" category in the Neighborhood Points of Interest filter. This is a content data error.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="36-neighborhood-page.png" alt="Neighborhood map" onclick="openLightbox(this)" /><div class="img-label">36 — Neighborhood map</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-15</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">SELECT checkboxes unresponsive — COMPARE feature broken</div>
+        </div>
+        <div class="finding-body">
+          <div class="diff-row">
+            <div class="diff-block diff-expected"><strong>Expected</strong>Click SELECT checkbox → checkbox checks → after 2 selected, COMPARE button activates</div>
+            <div class="diff-block diff-actual"><strong>Actual</strong>Checkboxes do not respond to click events; COMPARE button remains permanently greyed out</div>
+          </div>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="32-compare-selected.png" alt="Compare broken" onclick="openLightbox(this)" /><div class="img-label">32 — Checkboxes unresponsive</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-16</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">Company and Country fields saved but not shown on guest profile</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">Both fields are editable in Create/Update forms and data is persisted (visible when reopening the edit modal), but neither Company nor Country appear on the guest profile view — agents have no way to see this info without reopening the edit form.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="15-guest-detail.png" alt="Profile no company" onclick="openLightbox(this)" /><div class="img-label">15 — Profile: no company shown</div></div>
+            <div class="finding-img-wrap"><img src="16-edit-guest-modal.png" alt="Edit shows company" onclick="openLightbox(this)" /><div class="img-label">16 — Edit modal: company stored</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-17</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">LEASING TOUR / EMAIL / TOURS column-group headers non-functional</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">The three column-group headers in the All Clients table (LEASING TOUR, EMAIL, TOURS) visually suggest they are interactive tabs that switch the column set. Clicking them produces no visible change.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="57-email-tab-view.png" alt="Non-functional tabs" onclick="openLightbox(this)" /><div class="img-label">57 — No change after clicking EMAIL</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <div class="finding-id">F-18</div>
+          <div class="finding-badge badge-medium">Medium</div>
+          <div class="finding-title">Connect panel blocks Settings gear button (pointer event conflict)</div>
+        </div>
+        <div class="finding-body">
+          <p style="font-size:13px;margin-bottom:12px;">When the Connect panel is open, the Settings gear button underneath is blocked by the popup's pointer-event capture area — the gear cannot be clicked until the Connect panel is explicitly closed.</p>
+          <div class="finding-screenshots">
+            <div class="finding-img-wrap"><img src="48-screen-icon-modal.png" alt="Connect panel" onclick="openLightbox(this)" /><div class="img-label">48 — Connect panel open</div></div>
+            <div class="finding-img-wrap"><img src="49-settings-panel.png" alt="Settings panel" onclick="openLightbox(this)" /><div class="img-label">49 — Settings panel (when accessible)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ──────────── LOW ──────────── -->
+    <div class="section" id="low">
+      <div class="section-title"><span class="icon">🔵</span> Low Priority Issues</div>
+      <table class="data-table">
+        <tr><th>ID</th><th>Issue</th><th>Screenshot</th></tr>
+        <tr><td>F-19</td><td><strong>Brand name inconsistency</strong> — Landing page: "APARTMENTS AT WILSON'S BLVD"; rest of app: "APARTMENTS AT WILSON &amp; GLEBE"</td><td><code>01, 05</code></td></tr>
+        <tr><td>F-20</td><td><strong>Phone validation error copy inconsistent</strong> — Phone shows format hint ("Expected format: +1…"), other fields show "Invalid [field name]"</td><td><code>09</code></td></tr>
+        <tr><td>F-21</td><td><strong>Update Client modal missing subtitle</strong> — Create modal shows "Fill the form to create a new client"; Update modal subtitle is blank</td><td><code>16</code></td></tr>
+        <tr><td>F-22</td><td><strong>Analytics page names inconsistently capitalized</strong> — "Home", "Neighborhood", "Units" are capitalized; "availability", "finishes", "about" are lowercase</td><td><code>24</code></td></tr>
+        <tr><td>F-23</td><td><strong>Floor plan model names expose internal codes</strong> — Displayed as "Model BH-24_BB-24_BW-24" with underscores instead of user-friendly labels</td><td><code>34</code></td></tr>
+        <tr><td>F-24</td><td><strong>Share modal "Continue" button label ambiguous</strong> — Users can't tell if it sends immediately or moves to another step; should read "Send" or "Share"</td><td><code>23</code></td></tr>
+        <tr><td>F-25</td><td><strong>TOUR play button in client list produces no feedback</strong> — No navigation, modal, or visual state change on click</td><td><code>56</code></td></tr>
+      </table>
+    </div>
+
+    <!-- ──────────── UX ──────────── -->
+    <div class="section" id="ux">
+      <div class="section-title"><span class="icon">🎨</span> UI / UX Findings</div>
+      <div class="ux-grid">
+        <div class="ux-card">
+          <div class="ux-id">UX-01 · Medium</div>
+          <div class="ux-title">Complete theme break in CRM screens</div>
+          <div class="ux-desc">The All Clients page, guest detail, and analytics screens use a stark white design system while the main portal uses a navy/gold brand theme — visually jarring when switching between presentation and management contexts.</div>
+        </div>
+        <div class="ux-card">
+          <div class="ux-id">UX-02 · Medium</div>
+          <div class="ux-title">Share button auto-selects unit row unexpectedly</div>
+          <div class="ux-desc">Clicking the per-row Share icon also checks the SELECT checkbox and reveals a bottom action bar (Share / Remove from Favorites / Deselect). This side effect is invisible to the user and creates confusion about what is being acted upon.</div>
+        </div>
+        <div class="ux-card">
+          <div class="ux-id">UX-03 · Medium</div>
+          <div class="ux-title">PIN login has no forgotten PIN recovery or lockout messaging</div>
+          <div class="ux-desc">No "Forgot PIN" option exists. After entering a wrong PIN the system simply clears the dots with no error message, no lockout counter, and no indication of how many attempts are allowed.</div>
+        </div>
+        <div class="ux-card">
+          <div class="ux-id">UX-04 · Low</div>
+          <div class="ux-title">Home dashboard tiles have no visible hover affordance</div>
+          <div class="ux-desc">The 6 home tiles appear interactive but have no hover cursor change or overlay effect visible in testing — users unfamiliar with the interface may not know they are clickable buttons.</div>
+        </div>
+        <div class="ux-card">
+          <div class="ux-id">UX-05 · Low</div>
+          <div class="ux-title">Inconsistent tab/filter patterns across the app</div>
+          <div class="ux-desc">Gallery filters use pill-style toggle buttons. Client list uses column group headers styled as tabs. Availability uses top-right button groups. Unit list uses a "SELECT 2 TO COMPARE" banner. No consistent filtering pattern is established.</div>
+        </div>
+        <div class="ux-card">
+          <div class="ux-id">UX-06 · Low</div>
+          <div class="ux-title">"Select Guest" initials replacement is a good pattern — but tour end state is ambiguous</div>
+          <div class="ux-desc">During an active tour "Select Guest" is replaced with the guest's initials (e.g., "FL") — a clear, effective affordance. However, after a tour ends the button reverts to "Select Guest" text with no toast or indication that the tour was recorded, which could leave agents uncertain.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST CASES -->
+    <div class="section" id="testcases">
+      <div class="section-title"><span class="icon">🧪</span> Test Cases Executed</div>
+      <div class="tc-grid">
+
+        <div class="tc">
+          <div class="tc-num">TC-01</div>
+          <div><div class="tc-title">Agent Login — valid PIN</div><div class="tc-desc">Select "Quality Assurance" agent → enter PIN 1234 → verify redirect to home dashboard</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-02</div>
+          <div><div class="tc-title">Agent Login — invalid PIN</div><div class="tc-desc">Enter wrong PIN → verify error feedback is shown</div></div>
+          <div class="tc-result tc-partial">Partial — dots clear but no error message shown</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-03</div>
+          <div><div class="tc-title">Create Guest — empty form submit</div><div class="tc-desc">Click Create with no data → verify required field validation fires</div></div>
+          <div class="tc-result tc-pass">PASS — 4 fields validated</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-04</div>
+          <div><div class="tc-title">Create Guest — invalid email format</div><div class="tc-desc">Enter "bademail@" → verify email validation rejects it</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-05</div>
+          <div><div class="tc-title">Create Guest — invalid phone format</div><div class="tc-desc">Enter "5555551234" (no +1) → verify phone validation rejects it</div></div>
+          <div class="tc-result tc-pass">PASS — but UX issue (no masking)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-06</div>
+          <div><div class="tc-title">Create Guest — valid data submission</div><div class="tc-desc">Enter all valid fields including "+1 555-555-1234" format → submit → verify success toast</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-07</div>
+          <div><div class="tc-title">Guest List search — matching query</div><div class="tc-desc">Type "Felipe" in search → verify list filters to 1 result</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-08</div>
+          <div><div class="tc-title">Guest List search — no-match query</div><div class="tc-desc">Type "xyznotexist" → verify "No results." state displays</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-09</div>
+          <div><div class="tc-title">Edit Guest — data pre-population</div><div class="tc-desc">Open Edit modal → verify all previously entered fields are pre-filled</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-10</div>
+          <div><div class="tc-title">Guest Analytics — page visit data</div><div class="tc-desc">Open Felipe Lee → ANALYTICS tab → verify Sales Center page visit data</div></div>
+          <div class="tc-result tc-partial">Partial — page data shows but Access Summary is broken (F-11)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-11</div>
+          <div><div class="tc-title">Availability — status filter (AVAILABLE)</div><div class="tc-desc">Unit List → click AVAILABLE filter → verify only available units shown</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-12</div>
+          <div><div class="tc-title">Availability — unit detail view</div><div class="tc-desc">Click VIEW UNIT → verify floorplan image and unit specs load</div></div>
+          <div class="tc-result tc-partial">Partial — floorplan loads but VIEW field empty (F-13)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-13</div>
+          <div><div class="tc-title">Availability — unit compare feature</div><div class="tc-desc">Select 2 units using SELECT checkboxes → verify COMPARE activates</div></div>
+          <div class="tc-result tc-fail">FAIL — checkboxes unresponsive (F-15)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-14</div>
+          <div><div class="tc-title">Neighborhood — POI category filter</div><div class="tc-desc">Click DINING category → verify map highlights dining pins and list expands</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-15</div>
+          <div><div class="tc-title">Gallery — filter tabs</div><div class="tc-desc">Click RESIDENCES and AMENITIES tabs → verify content filters</div></div>
+          <div class="tc-result tc-partial">Partial — tabs filter but all content is placeholder (F-02)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-16</div>
+          <div><div class="tc-title">Share unit — modal and email template</div><div class="tc-desc">Click SHARE on a unit → verify modal pre-populates guest info and email template</div></div>
+          <div class="tc-result tc-pass">PASS — CTA label ambiguous (F-24)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-17</div>
+          <div><div class="tc-title">Favorites — toggle and filter</div><div class="tc-desc">Switch to FAVORITES tab → verify only heart-marked units shown</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-18</div>
+          <div><div class="tc-title">Start Tour flow</div><div class="tc-desc">Click START TOUR → verify button changes to HOME + END TOUR, guest initials appear in nav</div></div>
+          <div class="tc-result tc-pass">PASS</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-19</div>
+          <div><div class="tc-title">End Tour flow — date update</div><div class="tc-desc">End tour → verify "Last Toured" date updates to today on guest profile</div></div>
+          <div class="tc-result tc-pass">PASS — but list view not refreshed (F-10)</div>
+        </div>
+
+        <div class="tc">
+          <div class="tc-num">TC-20</div>
+          <div><div class="tc-title">Analytics Dashboard navigation</div><div class="tc-desc">Click ANALYTICS DASHBOARD button from All Clients page</div></div>
+          <div class="tc-result tc-fail">FAIL — no navigation or response (F-08)</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div class="section" id="performance">
+      <div class="section-title"><span class="icon">⚡</span> Performance Observations</div>
+      <div class="perf-grid">
+        <div class="perf-card">
+          <h4>DOM Load Time (home)</h4>
+          <div class="perf-value good">1,650ms</div>
+          <div class="perf-note">Acceptable for a media-rich SPA</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar good" style="width:33%"></div></div></div>
+        </div>
+        <div class="perf-card">
+          <h4>Post-login loading screen</h4>
+          <div class="perf-value warn">~10s</div>
+          <div class="perf-note">Long wait with no progress indicator</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar warn" style="width:70%"></div></div></div>
+        </div>
+        <div class="perf-card">
+          <h4>Page-to-page navigation</h4>
+          <div class="perf-value good">Instant</div>
+          <div class="perf-note">Hash routing — no full page reloads</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar good" style="width:10%"></div></div></div>
+        </div>
+        <div class="perf-card">
+          <h4>Console warnings (session end)</h4>
+          <div class="perf-value bad">88</div>
+          <div class="perf-note">Accumulated across all page visits</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar bad" style="width:88%"></div></div></div>
+        </div>
+        <div class="perf-card">
+          <h4>Console errors at login</h4>
+          <div class="perf-value good">0</div>
+          <div class="perf-note">Clean start</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar good" style="width:2%"></div></div></div>
+        </div>
+        <div class="perf-card">
+          <h4>Console errors (session end)</h4>
+          <div class="perf-value bad">7</div>
+          <div class="perf-note">Grew across Availability + Amenities pages</div>
+          <div class="perf-bar-wrap"><div class="perf-bar-bg"><div class="perf-bar bad" style="width:70%"></div></div></div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <h3 style="font-size:15px;font-weight:600;color:var(--navy);margin-bottom:12px;">Error Accumulation Timeline</h3>
+        <table class="data-table">
+          <tr><th>Page</th><th>Cumulative Errors</th><th>Cumulative Warnings</th><th>Status</th></tr>
+          <tr><td>Login / Home</td><td>0</td><td>12</td><td class="pass">✓ Clean</td></tr>
+          <tr><td>Guest List, Detail</td><td>0</td><td>18</td><td class="pass">✓ Clean</td></tr>
+          <tr><td>Availability (3D/List)</td><td class="warn">2</td><td>31–43</td><td class="warn">⚠ Errors begin</td></tr>
+          <tr><td>Neighborhood</td><td class="warn">3</td><td>49</td><td class="warn">⚠ Growing</td></tr>
+          <tr><td>Amenities</td><td class="fail">5</td><td>56</td><td class="fail">✗ Spike</td></tr>
+          <tr><td>Finishes + Tour</td><td class="fail">7</td><td>88</td><td class="fail">✗ Final count</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- RISKS -->
+    <div class="section" id="risks">
+      <div class="section-title"><span class="icon">⚠️</span> Risks &amp; Impact</div>
+      <table class="data-table">
+        <tr><th>Risk</th><th>Business Impact</th><th>Likelihood</th></tr>
+        <tr><td>Lorem Ipsum content visible to prospects during live tour</td><td class="fail">Severe — credibility/trust damage</td><td class="fail">High — already live</td></tr>
+        <tr><td>Gallery shows only placeholder images in sales presentation</td><td class="fail">High — core marketing content missing</td><td class="fail">High — already live</td></tr>
+        <tr><td>Kitchen photos display internal file metadata watermarks</td><td class="fail">High — unprofessional presentation</td><td class="fail">High — already live</td></tr>
+        <tr><td>$0.00 unit prices shown to prospects</td><td class="warn">Medium-High — legal/compliance risk; prospect confusion</td><td class="warn">Medium</td></tr>
+        <tr><td>7 JS console errors indicating silent failures</td><td class="warn">Medium — tour tracking or analytics may silently fail</td><td class="warn">Medium</td></tr>
+        <tr><td>Analytics Dashboard non-functional</td><td class="warn">Medium — management cannot track KPIs</td><td class="warn">Medium</td></tr>
+        <tr><td>Amenities section has no content</td><td class="warn">Medium — agents cannot present amenities during tours</td><td class="warn">Medium</td></tr>
+        <tr><td>EXTERIOR sqft = 0 for all units</td><td>Low-Medium — incomplete unit data for agent conversations</td><td class="warn">Medium</td></tr>
+        <tr><td>Unit compare feature broken</td><td>Low — agents cannot side-by-side compare units</td><td class="pass">Low</td></tr>
+      </table>
+    </div>
+
+    <!-- RECOMMENDATIONS -->
+    <div class="section" id="recommendations">
+      <div class="section-title"><span class="icon">💡</span> Recommendations</div>
+
+      <div class="rec-group rec-immediate">
+        <h4>🚨 IMMEDIATE — Block go-live until resolved</h4>
+        <ul class="rec-list">
+          <li>Replace Lorem Ipsum About page text with real property marketing copy</li>
+          <li>Upload actual property photography to Gallery (ALL, RESIDENCES, and AMENITIES tabs)</li>
+          <li>Remove/crop file metadata watermarks from all Finishes photos (Kitchens and Bathrooms)</li>
+          <li>Fix $0.00 pricing for units 828 and 328 in the data source</li>
+        </ul>
+      </div>
+
+      <div class="rec-group rec-high">
+        <h4>⬆️ HIGH — Resolve before public leasing use</h4>
+        <ul class="rec-list">
+          <li>Populate EXTERIOR sqft data for all units, or remove the column if not applicable</li>
+          <li>Fix 0 BEDS / 0 INT. SIZE data for units 746 and 363</li>
+          <li>Investigate and fix the 7 JavaScript console errors (especially those appearing on Availability and Amenities)</li>
+          <li>Implement or replace the Analytics Dashboard button — either wire up the route or remove the button</li>
+          <li>Add real content to the Amenities section (amenity list, descriptions, interactive floor plate, or photo gallery)</li>
+          <li>Fix the client list "WHEN" column to reflect the most recent tour date after a tour ends</li>
+          <li>Fix Access Summary (Total Accesses / Last Access) data sourcing</li>
+        </ul>
+      </div>
+
+      <div class="rec-group rec-medium">
+        <h4>🔧 MEDIUM — Quality improvements</h4>
+        <ul class="rec-list">
+          <li>Add phone input masking (e.g., auto-format to +1 XXX-XXX-XXXX) to reduce agent friction</li>
+          <li>Fix SELECT checkboxes in Unit List to enable the COMPARE feature</li>
+          <li>Populate VIEW field on Unit Details for all units</li>
+          <li>Move banks to a "Financial Services" or "Services" category in Neighborhood POIs</li>
+          <li>Make LEASING TOUR/EMAIL/TOURS tab headers functional or remove them if they are decorative labels only</li>
+          <li>Fix Connect panel pointer-event z-index to allow Settings gear access independently</li>
+          <li>Display Company and Country on the guest profile detail view</li>
+        </ul>
+      </div>
+
+      <div class="rec-group rec-low">
+        <h4>✨ LOW — Polish and consistency</h4>
+        <ul class="rec-list">
+          <li>Standardize property name — pick "Wilson's Blvd" OR "Wilson &amp; Glebe" and use it everywhere</li>
+          <li>Align phone validation error copy with other field messages ("Phone is required" / "Invalid phone number")</li>
+          <li>Add subtitle text to Update Client modal consistent with Create Client modal</li>
+          <li>Normalize analytics page name capitalization (all title case or all lowercase)</li>
+          <li>Replace internal model codes (BH-24_BB-24_BW-24) with user-friendly floor plan names</li>
+          <li>Change Share modal button to "Send" for clarity</li>
+          <li>Add visual confirmation/feedback when the TOUR play button is clicked from the client list</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SCREENSHOTS GALLERY -->
+    <div class="section" id="screenshots">
+      <div class="section-title"><span class="icon">📸</span> All Screenshots</div>
+
+      <div class="gallery-section">
+        <h3>Authentication &amp; Login</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><div class="gallery-tag badge-pass">Pass</div><img src="01-homepage-initial.png" onclick="openLightbox(this)" /><div class="gallery-label">01 — Landing page</div></div>
+          <div class="gallery-item"><img src="03-after-login-click.png" onclick="openLightbox(this)" /><div class="gallery-label">03 — Agent selection</div></div>
+          <div class="gallery-item"><img src="04-login-form.png" onclick="openLightbox(this)" /><div class="gallery-label">04 — PIN pad login</div></div>
+          <div class="gallery-item"><img src="05-pin-1234-result.png" onclick="openLightbox(this)" /><div class="gallery-label">05 — Loading after login</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Home Dashboard &amp; Navigation</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="06-dashboard-home.png" onclick="openLightbox(this)" /><div class="gallery-label">06 — Home dashboard</div></div>
+          <div class="gallery-item"><img src="07-select-guest-modal.png" onclick="openLightbox(this)" /><div class="gallery-label">07 — Select Guest dropdown</div></div>
+          <div class="gallery-item"><img src="48-screen-icon-modal.png" onclick="openLightbox(this)" /><div class="gallery-label">48 — Connect panel</div></div>
+          <div class="gallery-item"><img src="49-settings-panel.png" onclick="openLightbox(this)" /><div class="gallery-label">49 — Settings panel</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Guest Management</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Issue</div><img src="08-new-guest-form.png" onclick="openLightbox(this)" /><div class="gallery-label">08 — Create Client form</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Issue</div><img src="09-empty-form-submit.png" onclick="openLightbox(this)" /><div class="gallery-label">09 — Validation errors</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-high">Issue</div><img src="11-phone-format-test.png" onclick="openLightbox(this)" /><div class="gallery-label">11 — Phone format rejected</div></div>
+          <div class="gallery-item"><img src="12-guest-created-success.png" onclick="openLightbox(this)" /><div class="gallery-label">12 — Success toast</div></div>
+          <div class="gallery-item"><img src="13-guest-list.png" onclick="openLightbox(this)" /><div class="gallery-label">13 — All Clients loading</div></div>
+          <div class="gallery-item"><img src="14-guest-list-loaded.png" onclick="openLightbox(this)" /><div class="gallery-label">14 — All Clients loaded</div></div>
+          <div class="gallery-item"><img src="15-guest-detail.png" onclick="openLightbox(this)" /><div class="gallery-label">15 — Guest profile</div></div>
+          <div class="gallery-item"><img src="16-edit-guest-modal.png" onclick="openLightbox(this)" /><div class="gallery-label">16 — Edit modal</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-high">Issue</div><img src="24-felipe-analytics.png" onclick="openLightbox(this)" /><div class="gallery-label">24 — Analytics (inconsistent casing)</div></div>
+          <div class="gallery-item"><img src="19-search-results.png" onclick="openLightbox(this)" /><div class="gallery-label">19 — Search filtering</div></div>
+          <div class="gallery-item"><img src="20-search-no-results.png" onclick="openLightbox(this)" /><div class="gallery-label">20 — No results state</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-high">Issue</div><img src="21-felipe-lee-profile.png" onclick="openLightbox(this)" /><div class="gallery-label">21 — 0 sqft exterior (all units)</div></div>
+          <div class="gallery-item"><img src="22-favorites-tab.png" onclick="openLightbox(this)" /><div class="gallery-label">22 — Favorites tab</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-medium">Issue</div><img src="23-share-unit.png" onclick="openLightbox(this)" /><div class="gallery-label">23 — Share modal</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Tour Flow</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="50-start-tour.png" onclick="openLightbox(this)" /><div class="gallery-label">50 — Tour active (HOME/END TOUR)</div></div>
+          <div class="gallery-item"><img src="51-tour-home.png" onclick="openLightbox(this)" /><div class="gallery-label">51 — Home in tour mode (FL initials)</div></div>
+          <div class="gallery-item"><img src="52-availability-during-tour.png" onclick="openLightbox(this)" /><div class="gallery-label">52 — Availability during tour</div></div>
+          <div class="gallery-item"><img src="53-end-tour.png" onclick="openLightbox(this)" /><div class="gallery-label">53 — Tour ended (date updated)</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Content Pages — Critical Issues</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Critical</div><img src="26-about-page.png" onclick="openLightbox(this)" /><div class="gallery-label">26 — Lorem Ipsum About page</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Critical</div><img src="38-gallery-page.png" onclick="openLightbox(this)" /><div class="gallery-label">38 — Gallery placeholders (ALL)</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Critical</div><img src="39-gallery-residences.png" onclick="openLightbox(this)" /><div class="gallery-label">39 — Gallery placeholders (RESIDENCES)</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Critical</div><img src="45-finishes-kitchens.png" onclick="openLightbox(this)" /><div class="gallery-label">45 — Kitchen watermarks</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-high">High</div><img src="41-amenities-page.png" onclick="openLightbox(this)" /><div class="gallery-label">41 — Amenities: static image only</div></div>
+          <div class="gallery-item"><img src="44-finishes-page.png" onclick="openLightbox(this)" /><div class="gallery-label">44 — Finishes landing</div></div>
+          <div class="gallery-item"><img src="47-finishes-bathrooms.png" onclick="openLightbox(this)" /><div class="gallery-label">47 — Bathrooms (faint watermarks)</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Availability</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="28-availability-page.png" onclick="openLightbox(this)" /><div class="gallery-label">28 — 3D Explore view</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-critical">Issue</div><img src="29-unit-list-view.png" onclick="openLightbox(this)" /><div class="gallery-label">29 — Unit List ($0.00 prices)</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-high">Issue</div><img src="30-available-filter.png" onclick="openLightbox(this)" /><div class="gallery-label">30 — Available filter (0 bed units)</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-medium">Issue</div><img src="31-unit-detail.png" onclick="openLightbox(this)" /><div class="gallery-label">31 — Unit detail (VIEW blank)</div></div>
+          <div class="gallery-item"><div class="gallery-tag badge-medium">Issue</div><img src="32-compare-selected.png" onclick="openLightbox(this)" /><div class="gallery-label">32 — Compare: checkboxes broken</div></div>
+          <div class="gallery-item"><img src="34-floorplans-view.png" onclick="openLightbox(this)" /><div class="gallery-label">34 — Floorplans grid</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-section">
+        <h3>Neighborhood</h3>
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="36-neighborhood-page.png" onclick="openLightbox(this)" /><div class="gallery-label">36 — Neighborhood map</div></div>
+          <div class="gallery-item"><img src="37-neighborhood-dining-filter.png" onclick="openLightbox(this)" /><div class="gallery-label">37 — Dining filter expanded</div></div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- FOOTER -->
+<div class="report-footer">
+  QA Report — The Waycroft Portal &nbsp;·&nbsp; Generated June 2, 2026 &nbsp;·&nbsp; Exploratory Testing via Playwright MCP &nbsp;·&nbsp; 57 screenshots · 25 findings
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()" />
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<script>
+  function openLightbox(img) {
+    document.getElementById('lightbox-img').src = img.src;
+    document.getElementById('lightbox-caption').textContent = img.alt || img.src.split('/').pop();
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Smooth scroll for sidebar links
+  document.querySelectorAll('.sidebar a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>
